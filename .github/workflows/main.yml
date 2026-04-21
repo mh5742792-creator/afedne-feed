@@ -1,0 +1,36 @@
+name: Auto Scraper Feed
+
+on:
+  schedule:
+    - cron: '0 */6 * * *' # الكود سيعمل تلقائياً كل 6 ساعات
+  workflow_dispatch: # هذا الزر سيتيح لك تشغيله يدوياً متى شئت
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write 
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run Scraper
+        run: python scraper.py
+
+      - name: Commit and Push Data
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action Bot"
+          git add feed.json
+          git commit -m "Auto-update feed data" || echo "No changes to commit"
+          git push
